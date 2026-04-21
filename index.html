@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FinOp — InnoFactury</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg0:#03080F;--bg1:#060E1A;--bg2:#0A1525;--bg3:#0F1E33;--bg4:#162540;
+  --border:#1E3152;--border2:#254070;
+  --txt:#E8F0FE;--txt2:#8BA3C7;--txt3:#506A8E;
+  --or:#FF6B00;--or2:rgba(255,107,0,.12);--or3:rgba(255,107,0,.25);
+  --cy:#00D4FF;--cy2:rgba(0,212,255,.1);
+  --gr:#00C896;--gr2:rgba(0,200,150,.1);
+  --rd:#FF4757;--rd2:rgba(255,71,87,.1);
+  --yw:#FFD600;--yw2:rgba(255,214,0,.1);
+  --pu:#B39DDB;--pu2:rgba(179,157,219,.1);
+  --mono:'JetBrains Mono',monospace;
+  --head:'Space Grotesk',sans-serif;
+  --body:'Inter',sans-serif;
+  --r4:4px;--r6:6px;--r8:8px;--r12:12px;
+  --sidebar:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--txt);font-family:var(--body);font-size:13px;min-height:100vh;display:flex;flex-direction:column}
+input,select,textarea{font-family:var(--body);font-size:13px;background:var(--bg2);border:1px solid var(--border);color:var(--txt);border-radius:var(--r6);padding:8px 10px;outline:none;width:100%;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--or)}
+select option{background:var(--bg2)}
+button{cursor:pointer;font-family:var(--body);font-size:13px;transition:all .15s}
+
+/* ── TOPBAR ── */
+.topbar{height:52px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;position:sticky;top:0;z-index:200}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-mark{width:28px;height:28px;background:var(--or);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-weight:700;font-size:13px;color:#fff;letter-spacing:-.5px}
+.logo-name{font-family:var(--head);font-weight:700;font-size:15px;color:#fff;letter-spacing:-.3px}
+.logo-name span{color:var(--or)}
+.product-tag{font-family:var(--mono);font-size:10px;color:var(--txt3);background:var(--bg3);border:1px solid var(--border);padding:2px 8px;border-radius:20px;margin-left:4px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.company-badge{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);padding:5px 12px;border-radius:20px;font-size:12px;color:var(--txt2);cursor:pointer;transition:border-color .2s}
+.company-badge:hover{border-color:var(--or)}
+.company-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--gr);flex-shrink:0}
+.year-sel{background:var(--bg2);border:1px solid var(--border);color:var(--txt);padding:5px 10px;border-radius:var(--r6);font-size:12px;font-family:var(--mono);width:auto}
+
+/* ── LAYOUT ── */
+.shell{display:flex;flex:1;height:calc(100vh - 52px);overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);background:var(--bg1);border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto;padding:12px 0}
+.nav-section{padding:8px 14px 4px;font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:.12em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;color:var(--txt2);font-size:12px;font-weight:500;transition:all .15s;position:relative;border-left:2px solid transparent;margin:1px 0}
+.nav-item .nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nav-item:hover{color:var(--txt);background:var(--bg2)}
+.nav-item.active{color:var(--or);background:var(--or2);border-left-color:var(--or)}
+.nav-badge{margin-left:auto;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1px 7px;font-family:var(--mono);font-size:10px;color:var(--txt3)}
+.nav-item.active .nav-badge{background:var(--or);color:#fff;border-color:var(--or)}
+.nav-divider{height:1px;background:var(--border);margin:8px 14px}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:0}
+.page{display:none;flex-direction:column;gap:20px}
+.page.active{display:flex}
+
+/* ── PAGE HEADER ── */
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.page-hdr h1{font-family:var(--head);font-size:22px;font-weight:700;color:#fff;letter-spacing:-.4px}
+.page-hdr h1 span{color:var(--or)}
+.page-hdr p{color:var(--txt2);font-size:12px;margin-top:3px}
+.hdr-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+
+/* ── BUTTONS ── */
+.btn-primary{background:var(--or);color:#fff;border:none;padding:8px 16px;border-radius:var(--r6);font-weight:600;font-size:12px}
+.btn-primary:hover{background:#e85f00}
+.btn-secondary{background:var(--bg3);color:var(--txt);border:1px solid var(--border2);padding:7px 14px;border-radius:var(--r6);font-weight:500;font-size:12px}
+.btn-secondary:hover{border-color:var(--or);color:var(--or)}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--txt2);padding:5px 10px;border-radius:var(--r4);font-size:11px}
+.btn-ghost:hover{border-color:var(--border2);color:var(--txt)}
+.btn-danger{background:none;border:1px solid var(--rd2);color:var(--rd);padding:5px 10px;border-radius:var(--r4);font-size:11px}
+.btn-danger:hover{background:var(--rd2)}
+.btn-sm{padding:5px 12px;font-size:11px}
+
+/* ── CARDS / PANELS ── */
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r12);padding:18px 20px}
+.card-title{font-family:var(--head);font-size:12px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:14px;border-radius:2px;flex-shrink:0}
+.ct-orange::before{background:var(--or)}
+.ct-cyan::before{background:var(--cy)}
+.ct-green::before{background:var(--gr)}
+.ct-red::before{background:var(--rd)}
+.ct-purple::before{background:var(--pu)}
+.ct-yellow::before{background:var(--yw)}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+/* ── KPI CARDS ── */
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r8);padding:14px 16px}
+.kpi-label{font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.kpi-val{font-family:var(--mono);font-size:24px;font-weight:600;line-height:1;margin-bottom:3px}
+.kpi-sub{font-size:11px;color:var(--txt3)}
+.delta-up{color:var(--gr)}
+.delta-dn{color:var(--rd)}
+
+/* ── TABLES ── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r8);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--bg2);text-align:left;padding:10px 14px;font-family:var(--mono);font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:12px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--bg2)}
+.tbl-actions{display:flex;gap:6px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-family:var(--mono);font-size:10px;font-weight:600;white-space:nowrap}
+.badge-opex{background:var(--cy2);color:var(--cy);border:1px solid rgba(0,212,255,.2)}
+.badge-capex{background:var(--rd2);color:var(--rd);border:1px solid rgba(255,71,87,.2)}
+.badge-lean{background:var(--gr2);color:var(--gr);border:1px solid rgba(0,200,150,.2)}
+.badge-pend{background:var(--yw2);color:var(--yw);border:1px solid rgba(255,214,0,.2)}
+.badge-done{background:var(--gr2);color:var(--gr);border:1px solid rgba(0,200,150,.2)}
+.badge-ok{background:var(--or2);color:var(--or);border:1px solid var(--or3)}
+.badge-cc{background:var(--pu2);color:var(--pu);border:1px solid rgba(179,157,219,.2)}
+
+/* ── FORMS ── */
+.form-grid{display:grid;gap:12px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:11px;color:var(--txt2);font-weight:500}
+.form-sep{font-family:var(--head);font-size:11px;font-weight:600;color:var(--or);text-transform:uppercase;letter-spacing:.08em;padding:12px 0 4px;border-top:1px solid var(--border);margin-top:4px}
+
+/* ── FORMULA DISPLAY ── */
+.formula{background:var(--bg0);border:1px solid var(--border);border-left:3px solid var(--or);border-radius:0 var(--r6) var(--r6) 0;padding:12px 16px;font-family:var(--mono);font-size:11px;line-height:1.9}
+.f-main{color:var(--or);font-weight:600;font-size:12px}
+.f-v{color:var(--cy)}
+.f-c{color:var(--txt3);font-size:10px}
+.f-g{color:var(--gr)}
+
+/* ── DRIVER RESULT ── */
+.result-bar{background:var(--bg0);border:1px solid var(--or3);border-radius:var(--r8);padding:14px 18px;display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.res-item .res-label{font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.res-item .res-val{font-family:var(--mono);font-size:18px;font-weight:600}
+
+/* ── PROGRESS BAR ── */
+.prog-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:4px}
+.prog-fill{height:100%;border-radius:2px;transition:width .4s}
+
+/* ── SLIDERS ── */
+.sl-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+.sl-lbl{font-size:11px;color:var(--txt2);width:150px;flex-shrink:0}
+input[type=range]{flex:1;accent-color:var(--or);height:3px}
+.sl-val{font-family:var(--mono);font-size:11px;color:var(--or);font-weight:600;width:80px;text-align:right;flex-shrink:0}
+
+/* ── TABS INSIDE PAGE ── */
+.inner-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:18px}
+.itab{background:none;border:none;border-bottom:2px solid transparent;color:var(--txt3);font-size:12px;font-weight:500;padding:8px 16px;cursor:pointer;transition:all .15s}
+.itab.active{color:var(--or);border-bottom-color:var(--or)}
+.itab:hover:not(.active){color:var(--txt2)}
+.itab-panel{display:none}
+.itab-panel.active{display:block}
+
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg1);border:1px solid var(--border2);border-radius:var(--r12);padding:24px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal h2{font-family:var(--head);font-size:18px;font-weight:700;margin-bottom:4px;color:#fff}
+.modal p{color:var(--txt2);font-size:12px;margin-bottom:18px}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:14px;border-top:1px solid var(--border)}
+
+/* ── CHART WRAPPERS ── */
+.chart-box{position:relative;width:100%}
+
+/* ── WATERMARK ── */
+.watermark{font-family:var(--mono);font-size:9px;color:var(--txt3);text-align:center;padding:10px 0 6px;letter-spacing:.08em}
+.watermark span{color:var(--or)}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:40px 20px;color:var(--txt3)}
+.empty-icon{font-size:32px;margin-bottom:8px}
+.empty p{font-size:12px;margin-bottom:12px}
+
+/* ── CHIP ── */
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:3px 8px;font-family:var(--mono);font-size:10px;color:var(--txt2)}
+
+/* ── SETUP CARD ── */
+.setup-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r8);padding:16px 18px;margin-bottom:12px}
+.setup-section h3{font-family:var(--head);font-size:13px;font-weight:600;color:var(--txt);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+/* ── LOGO UPLOAD AREA ── */
+.logo-area{border:1px dashed var(--border2);border-radius:var(--r8);padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;background:var(--bg2)}
+.logo-area:hover{border-color:var(--or)}
+.logo-preview{width:80px;height:80px;border-radius:var(--r8);background:var(--bg3);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-family:var(--head);font-weight:700;font-size:24px;color:var(--or)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ TOPBAR ═══════════ -->
+<div class="topbar">
+  <a class="logo">
+    <div class="logo-mark">FO</div>
+    <span class="logo-name"><span>Fin</span>Op</span>
+  </a>
+  <span class="product-tag">by InnoFactury™</span>
+  <div class="topbar-right">
+    <select class="year-sel" id="anoRef" onchange="refreshAll()">
+      <option>2025</option><option selected>2026</option><option>2027</option>
+    </select>
+    <div class="company-badge" onclick="goPage('setup')">
+      <div class="dot"></div>
+      <span id="empresa-badge-name">Configurar Empresa</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SHELL ═══════════ -->
+<div class="shell">
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="nav-section">Principal</div>
+  <div class="nav-item active" onclick="goPage('home',this)"><span class="nav-icon">◈</span> Dashboard</div>
+  <div class="nav-item" onclick="goPage('setup',this)"><span class="nav-icon">🏢</span> Configurar Empresa</div>
+
+  <div class="nav-divider"></div>
+  <div class="nav-section">Estrutura</div>
+  <div class="nav-item" onclick="goPage('cc',this)"><span class="nav-icon">🗂</span> Centros de Custo <span class="nav-badge" id="badge-cc">0</span></div>
+  <div class="nav-item" onclick="goPage('despesas',this)"><span class="nav-icon">📋</span> Tipos de Despesa <span class="nav-badge" id="badge-td">0</span></div>
+
+  <div class="nav-divider"></div>
+  <div class="nav-section">Orçamento</div>
+  <div class="nav-item" onclick="goPage('drivers',this)"><span class="nav-icon">⌨</span> Lançar Drivers <span class="nav-badge" id="badge-dr">0</span></div>
+  <div class="nav-item" onclick="goPage('consolidado',this)"><span class="nav-icon">📊</span> Orçamento Consolidado</div>
+
+  <div class="nav-divider"></div>
+  <div class="nav-section">Inteligência</div>
+  <div class="nav-item" onclick="goPage('lean',this)"><span class="nav-icon">♻</span> Projetos Lean / Kaizen <span class="nav-badge" id="badge-lean">0</span></div>
+  <div class="nav-item" onclick="goPage('capex',this)"><span class="nav-icon">🏗</span> CAPEX & ROI</div>
+
+  <div class="nav-divider"></div>
+  <div class="nav-section">Produto</div>
+  <div class="nav-item" onclick="alert('Funcionalidade na versão Enterprise')"><span class="nav-icon">🔗</span> Integrações ERP/SAP</div>
+  <div class="nav-item" onclick="alert('Funcionalidade na versão Enterprise')"><span class="nav-icon">👥</span> Usuários & Permissões</div>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="main">
+
+<!-- ░░░░░ HOME ░░░░░ -->
+<div class="page active" id="page-home">
+  <div class="page-hdr">
+    <div>
+      <h1><span>FinOp</span> · Dashboard</h1>
+      <p>Visão consolidada do orçamento — motor indutivo de drivers operacionais — <span id="dash-empresa">Empresa não configurada</span> · <span id="dash-ano">2026</span></p>
+    </div>
+    <div class="hdr-actions">
+      <button class="btn-secondary btn-sm" onclick="exportarRelatorio()">⬇ Exportar Relatório</button>
+      <button class="btn-primary btn-sm" onclick="goPage('drivers')">+ Lançar Drivers</button>
+    </div>
+  </div>
+
+  <div class="g4">
+    <div class="kpi">
+      <div class="kpi-label">OPEX Total Forecast</div>
+      <div class="kpi-val" style="color:var(--cy)" id="kpi-opex-total">R$ 0</div>
+      <div class="kpi-sub" id="kpi-opex-sub">0 lançamentos ativos</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Economia Lean Acum.</div>
+      <div class="kpi-val" style="color:var(--gr)" id="kpi-lean-total">R$ 0</div>
+      <div class="kpi-sub delta-up" id="kpi-lean-sub">0 projetos ativos</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">CAPEX em Análise</div>
+      <div class="kpi-val" style="color:var(--rd)" id="kpi-capex-total">R$ 0</div>
+      <div class="kpi-sub" id="kpi-capex-sub">0 investimentos</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Centros de Custo</div>
+      <div class="kpi-val" style="color:var(--or)" id="kpi-cc-total">0</div>
+      <div class="kpi-sub" id="kpi-cc-sub">0 departamentos</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-title ct-orange">OPEX por Centro de Custo</div>
+      <div class="chart-box" style="height:220px"><canvas id="chartCC" role="img" aria-label="OPEX por centro de custo">Gráfico de OPEX por CC.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title ct-cyan">Forecast Mensal — Ano <span id="chart-ano-label">2026</span></div>
+      <div class="chart-box" style="height:220px"><canvas id="chartMensal" role="img" aria-label="Forecast mensal de OPEX">Forecast mensal.</canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title ct-green">Lançamentos Recentes</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Centro de Custo</th><th>Tipo Despesa</th><th>Driver Principal</th><th>Valor Calculado</th><th>Tipo</th><th>Mês</th></tr></thead>
+        <tbody id="tbl-recentes"><tr><td colspan="6"><div class="empty"><div class="empty-icon">📭</div><p>Nenhum lançamento ainda. <a href="#" onclick="goPage('drivers')" style="color:var(--or)">Lançar drivers agora →</a></p></div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ░░░░░ SETUP ░░░░░ -->
+<div class="page" id="page-setup">
+  <div class="page-hdr">
+    <div><h1>Configurar <span>Empresa</span> — FinOp</h1><p>Personalize o sistema para sua organização. Estas configurações são a base de todos os cálculos.</p></div>
+    <div class="hdr-actions"><button class="btn-primary" onclick="salvarEmpresa()">💾 Salvar Configurações</button></div>
+  </div>
+
+  <div class="g2">
+    <div>
+      <div class="setup-section">
+        <h3>🏢 Identidade da Empresa</h3>
+        <div class="form-grid">
+          <div class="logo-area" onclick="document.getElementById('logoInput').click()">
+            <div class="logo-preview" id="logo-preview-box">IF</div>
+            <p style="color:var(--txt3);font-size:11px">Clique para carregar logo (PNG/SVG)</p>
+            <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="previewLogo(this)">
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Nome da Empresa</label><input id="emp-nome" placeholder="Ex: Vale S.A."></div>
+            <div class="form-group"><label>Razão Social</label><input id="emp-razao" placeholder="Razão social completa"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>CNPJ</label><input id="emp-cnpj" placeholder="00.000.000/0001-00"></div>
+            <div class="form-group"><label>Setor Industrial</label>
+              <select id="emp-setor">
+                <option>Mining & Recursos Naturais</option>
+                <option>Automotive / Automotivo</option>
+                <option>Papel & Celulose</option>
+                <option>Siderurgia & Metalurgia</option>
+                <option>Petróleo & Gás</option>
+                <option>Alimentos & Bebidas</option>
+                <option>Químico & Petroquímico</option>
+                <option>Outro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>País / Região</label><input id="emp-pais" placeholder="Brasil" value="Brasil"></div>
+            <div class="form-group"><label>Moeda Principal</label>
+              <select id="emp-moeda"><option value="BRL">BRL — Real Brasileiro</option><option value="USD">USD — Dólar Americano</option><option value="CAD">CAD — Dólar Canadense</option><option value="AUD">AUD — Dólar Australiano</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <h3>📅 Exercício Orçamentário</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Ano de Referência</label><input id="emp-ano" type="number" value="2026"></div>
+          <div class="form-group"><label>Início do Exercício</label><select id="emp-inicio"><option>Janeiro</option><option>Abril</option><option>Julho</option><option>Outubro</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Ciclo de Revisão</label><select id="emp-ciclo"><option>Mensal</option><option>Trimestral</option><option selected>Semestral</option></select></div>
+          <div class="form-group"><label>Nível de Aprovação CAPEX</label><input id="emp-capex-min" placeholder="Ex: R$ 50.000"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="setup-section">
+        <h3>📈 Parâmetros Macroeconômicos</h3>
+        <div class="form-grid">
+          <div class="form-row">
+            <div class="form-group"><label>IPCA Projetado (%)</label><input id="mac-ipca" type="number" step="0.1" value="5.2" placeholder="5.2"></div>
+            <div class="form-group"><label>IGP-M Projetado (%)</label><input id="mac-igpm" type="number" step="0.1" value="6.1" placeholder="6.1"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Preço Diesel (R$/L)</label><input id="mac-diesel" type="number" step="0.01" value="5.89" placeholder="5.89"></div>
+            <div class="form-group"><label>Preço GN (R$/m³)</label><input id="mac-gn" type="number" step="0.01" value="2.45" placeholder="2.45"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Energia Elétrica (R$/kWh)</label><input id="mac-ee" type="number" step="0.001" value="0.724" placeholder="0.724"></div>
+            <div class="form-group"><label>Taxa SELIC / TMA (%)</label><input id="mac-selic" type="number" step="0.01" value="12.25" placeholder="12.25"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>USD/BRL (câmbio)</label><input id="mac-usd" type="number" step="0.01" value="5.72" placeholder="5.72"></div>
+            <div class="form-group"><label>Encargos Trabalhistas (%)</label><input id="mac-enc" type="number" step="0.1" value="72.5" placeholder="72.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section">
+        <h3>⚙️ Premissas Lean</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Taxa de Decaimento Kaizen (%/ano)</label><input id="lean-decay" type="number" value="8" step="0.5"></div>
+          <div class="form-group"><label>OEE Referência (%)</label><input id="lean-oee" type="number" value="72" step="0.5"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>MTBF Mínimo Aceitável (h)</label><input id="lean-mtbf" type="number" value="240"></div>
+          <div class="form-group"><label>Custo Parada Padrão (R$/h)</label><input id="lean-parada" type="number" value="45000"></div>
+        </div>
+        <p style="color:var(--txt3);font-size:11px;margin-top:8px">Estes valores são usados como referência nos cálculos de ganhos Lean e ROI de CAPEX em todos os centros de custo.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░░░░ CENTROS DE CUSTO ░░░░░ -->
+<div class="page" id="page-cc">
+  <div class="page-hdr">
+    <div><h1>Centros de <span>Custo</span></h1><p>Estrutura organizacional que organiza os lançamentos de drivers por área, planta ou departamento.</p></div>
+    <div class="hdr-actions"><button class="btn-primary" onclick="abrirModalCC()">+ Novo Centro de Custo</button></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title ct-purple">Centros de Custo Cadastrados</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Código CC</th><th>Descrição</th><th>Departamento</th><th>Planta / Localização</th><th>Responsável</th><th>Orç. Limite</th><th>Utilizado</th><th>Status</th><th></th></tr></thead>
+        <tbody id="tbl-cc">
+          <tr><td colspan="9"><div class="empty"><div class="empty-icon">🗂</div><p>Nenhum centro de custo. Crie o primeiro para começar.</p><button class="btn-primary btn-sm" onclick="abrirModalCC()">+ Criar CC</button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title ct-orange">Departamentos Cadastrados</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <div id="dept-chips"></div>
+    </div>
+    <div class="form-row" style="max-width:460px">
+      <div class="form-group"><label>Nome do Departamento</label><input id="novo-dept" placeholder="Ex: Manutenção Mecânica"></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn-secondary" onclick="addDept()">+ Adicionar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░░░░ TIPOS DE DESPESA ░░░░░ -->
+<div class="page" id="page-despesas">
+  <div class="page-hdr">
+    <div><h1>Tipos de <span>Despesa</span></h1><p>Classificação hierárquica OPEX/CAPEX com correlação a drivers operacionais e fórmulas de cálculo.</p></div>
+    <div class="hdr-actions"><button class="btn-primary" onclick="abrirModalTD()">+ Nova Despesa</button></div>
+  </div>
+
+  <div class="inner-tabs">
+    <button class="itab active" onclick="switchInner('td-opex',this)">OPEX</button>
+    <button class="itab" onclick="switchInner('td-capex',this)">CAPEX</button>
+    <button class="itab" onclick="switchInner('td-correlacao',this)">Tabela de Correlação</button>
+  </div>
+
+  <div class="itab-panel active" id="panel-td-opex">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Código</th><th>Categoria</th><th>Subcategoria</th><th>Driver Principal</th><th>Fórmula</th><th>Unidade</th><th>Ajuste IPC</th><th></th></tr></thead>
+        <tbody id="tbl-td-opex"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="itab-panel" id="panel-td-capex">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Código</th><th>Categoria</th><th>Subcategoria</th><th>Driver Principal</th><th>Fórmula</th><th>Vida Útil</th><th>Depreciação</th><th></th></tr></thead>
+        <tbody id="tbl-td-capex"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="itab-panel" id="panel-td-correlacao">
+    <div class="card">
+      <div class="card-title ct-orange">Motor de Correlação — Drivers × Fórmulas × Outputs</div>
+      <div class="formula">
+        <div class="f-main">OPEX_total = Σ_CC Σ_TD [Driver_i × Correlação_i × IPC_t × (1 - η_lean)]</div><br>
+        <span class="f-c">── Camada 1: Inputs Operacionais ──────────────────────────────</span><br>
+        <span class="f-v">Drivers</span> = {N_máquinas, Hrs_op, Km/dia, %Demanda, HH, Kwh, L_diesel, m³_GN}<br><br>
+        <span class="f-c">── Camada 2: Fatores de Correlação por Tipo de Despesa ────────</span><br>
+        <span class="f-v">Combustível</span>  = N × Hrs × CE × P_diesel × IPC_t<br>
+        <span class="f-v">Mão de Obra</span>  = HH_padrão × Custo_HH × (1 + Encargos%) × OEE_fator<br>
+        <span class="f-v">Energia</span>      = kWh_consumo × P_ee × IPC_t × Fator_demanda<br>
+        <span class="f-v">Manutenção</span>   = Σ(Hrs_PM × Custo_técnico) + Materiais_PM + CM_estimado<br>
+        <span class="f-v">Logística</span>    = Km_total × Custo_km × IPC_t × Fator_carga<br><br>
+        <span class="f-c">── Camada 3: Ajuste Macroeconômico ────────────────────────────</span><br>
+        <span class="f-v">IPC_t</span>        = (1 + IPCA)^(t/12) × β_commodity<br><br>
+        <span class="f-c">── Camada 4: Abatimento Lean em Tempo Real ─────────────────────</span><br>
+        <span class="f-g">η_lean</span>       = Σ_projetos(α_i × Yield_i × (1 - δ_i))<br><br>
+        <span class="f-main">OPEX_Forecast = OPEX_Base × (1 - η_lean) + CAPEX_equivalent</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░░░░ LANÇAR DRIVERS ░░░░░ -->
+<div class="page" id="page-drivers">
+  <div class="page-hdr">
+    <div><h1>Lançar <span>Drivers</span></h1><p>Insira drivers operacionais — o motor calcula automaticamente o impacto financeiro por centro de custo.</p></div>
+    <div class="hdr-actions"><button class="btn-secondary btn-sm" onclick="limparFormDriver()">✕ Limpar</button><button class="btn-primary" onclick="lancarDriver()">✓ Calcular & Lançar</button></div>
+  </div>
+
+  <div class="g2">
+    <!-- FORM -->
+    <div class="card">
+      <div class="card-title ct-orange">Identificação do Lançamento</div>
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-group"><label>Centro de Custo *</label>
+            <select id="dr-cc"><option value="">— Selecione —</option></select>
+          </div>
+          <div class="form-group"><label>Mês de Referência *</label>
+            <select id="dr-mes">
+              <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
+              <option>Abril</option><option>Maio</option><option>Junho</option>
+              <option>Julho</option><option>Agosto</option><option>Setembro</option>
+              <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Tipo de Despesa *</label>
+            <select id="dr-td" onchange="atualizarFormDriver()"><option value="">— Selecione —</option></select>
+          </div>
+          <div class="form-group"><label>Observação</label>
+            <input id="dr-obs" placeholder="Contexto ou justificativa">
+          </div>
+        </div>
+
+        <div class="form-sep">⬡ Drivers Operacionais</div>
+        <div id="driver-fields">
+          <div class="empty" style="padding:20px 0"><p>Selecione um Tipo de Despesa para ver os campos de driver.</p></div>
+        </div>
+
+        <div class="form-sep">⬡ Ajustes de Eficiência</div>
+        <div class="form-row">
+          <div class="form-group"><label>Ganho Lean η (%)</label><input id="dr-eta" type="number" step="0.5" value="0" placeholder="% de redução por Lean" oninput="recalcularDriver()"></div>
+          <div class="form-group"><label>IPC Acumulado (%)</label><input id="dr-ipc" type="number" step="0.1" value="5.2" placeholder="% inflação acumulada" oninput="recalcularDriver()"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title ct-cyan">Resultado do Cálculo Indutivo</div>
+        <div id="result-area">
+          <div class="empty" style="padding:20px 0"><p>Preencha os campos ao lado para calcular.</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title ct-green">Histórico de Lançamentos</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>CC</th><th>Despesa</th><th>Mês</th><th>Valor</th><th>Tipo</th><th></th></tr></thead>
+            <tbody id="tbl-hist-drivers">
+              <tr><td colspan="6"><div class="empty" style="padding:16px 0"><p>Nenhum lançamento.</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░░░░ ORÇAMENTO CONSOLIDADO ░░░░░ -->
+<div class="page" id="page-consolidado">
+  <div class="page-hdr">
+    <div><h1>FinOp · <span>Consolidado</span></h1><p>Visão agregada por centro de custo, tipo de despesa e departamento — narrativa "Produzir Mais com Menos".</p></div>
+    <div class="hdr-actions">
+      <select id="filtro-cc" class="year-sel" style="width:auto" onchange="renderConsolidado()"><option value="">Todos os CCs</option></select>
+      <select id="filtro-dept" class="year-sel" style="width:auto" onchange="renderConsolidado()"><option value="">Todos os Depts</option></select>
+      <button class="btn-primary btn-sm" onclick="exportarRelatorio()">⬇ Exportar</button>
+    </div>
+  </div>
+
+  <div class="g4" style="margin-bottom:4px">
+    <div class="kpi"><div class="kpi-label">OPEX Orçado Orig.</div><div class="kpi-val" style="color:var(--rd)" id="con-orig">R$ 0</div></div>
+    <div class="kpi"><div class="kpi-label">OPEX Forecast Lean</div><div class="kpi-val" style="color:var(--or)" id="con-lean">R$ 0</div></div>
+    <div class="kpi"><div class="kpi-label">Economia Lean</div><div class="kpi-val" style="color:var(--gr)" id="con-eco">R$ 0</div></div>
+    <div class="kpi"><div class="kpi-label">CAPEX Aprovado</div><div class="kpi-val" style="color:var(--pu)" id="con-capex">R$ 0</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-title ct-orange">Breakdown por Categoria</div>
+      <div class="chart-box" style="height:220px"><canvas id="chartBreakdown" role="img" aria-label="Breakdown de OPEX por categoria">Breakdown OPEX.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title ct-green">Narrativa Executiva — Produzir Mais com Menos</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div style="text-align:center;padding:16px;background:var(--bg2);border-radius:var(--r8)">
+          <div style="font-family:var(--mono);font-size:32px;font-weight:600;color:var(--rd)" id="narr-vol">—</div>
+          <div style="font-size:11px;color:var(--txt2);margin-top:4px">Volume Produzido</div>
+        </div>
+        <div style="text-align:center;padding:16px;background:var(--gr2);border-radius:var(--r8);border:1px solid rgba(0,200,150,.2)">
+          <div style="font-family:var(--mono);font-size:32px;font-weight:600;color:var(--gr)" id="narr-opex">—</div>
+          <div style="font-size:11px;color:var(--txt2);margin-top:4px">OPEX / Unidade</div>
+        </div>
+        <div style="text-align:center;padding:16px;background:var(--or2);border-radius:var(--r8);border:1px solid var(--or3)">
+          <div style="font-family:var(--mono);font-size:32px;font-weight:600;color:var(--or)" id="narr-ebtda">—</div>
+          <div style="font-size:11px;color:var(--txt2);margin-top:4px">EBTDA Op.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title ct-cyan">Tabela Consolidada — Por Centro de Custo</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>CC</th><th>Departamento</th><th>OPEX Original</th><th>Lean Abatimento</th><th>Forecast Ajustado</th><th>CAPEX Assoc.</th><th>% do Total</th><th>Status</th></tr></thead>
+        <tbody id="tbl-consolidado">
+          <tr><td colspan="8"><div class="empty"><p>Lance drivers para ver a consolidação.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ░░░░░ LEAN / KAIZEN ░░░░░ -->
+<div class="page" id="page-lean">
+  <div class="page-hdr">
+    <div><h1>Projetos <span>Lean & Kaizen</span></h1><p>Cada projeto encerrado abate automaticamente o forecast de OPEX do centro de custo vinculado.</p></div>
+    <div class="hdr-actions"><button class="btn-primary" onclick="abrirModalLean()">+ Novo Projeto</button></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-title ct-green">Calculadora de Impacto Lean</div>
+      <div class="sl-row"><span class="sl-lbl">Custo Waste (R$ k/mês)</span><input type="range" min="5" max="200" value="45" id="ln-waste" oninput="calcLeanSim()"><span class="sl-val" id="lv-waste">R$ 45k</span></div>
+      <div class="sl-row"><span class="sl-lbl">Fator Eliminação α (%)</span><input type="range" min="10" max="95" value="70" id="ln-alpha" oninput="calcLeanSim()"><span class="sl-val" id="lv-alpha">70%</span></div>
+      <div class="sl-row"><span class="sl-lbl">Decay pós-Kaizen (%/ano)</span><input type="range" min="0" max="20" value="8" id="ln-decay" oninput="calcLeanSim()"><span class="sl-val" id="lv-decay">8%</span></div>
+      <div class="sl-row"><span class="sl-lbl">IPCA (%)</span><input type="range" min="0" max="15" value="5" id="ln-ipca" oninput="calcLeanSim()"><span class="sl-val" id="lv-ipca">5%</span></div>
+      <div class="result-bar" style="margin-top:12px">
+        <div class="res-item"><div class="res-label">Ganho Ano 1</div><div class="res-val" style="color:var(--gr)" id="ls-y1">R$ 0</div></div>
+        <div class="res-item"><div class="res-label">Acum. 5 Anos</div><div class="res-val" style="color:var(--gr)" id="ls-y5">R$ 0</div></div>
+        <div class="res-item"><div class="res-label">Abat. OPEX</div><div class="res-val" style="color:var(--or)" id="ls-pct">0%</div></div>
+      </div>
+      <div class="chart-box" style="height:160px;margin-top:14px"><canvas id="chartLeanSim" role="img" aria-label="Projeção ganho lean">Projeção lean.</canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title ct-green">Projetos Cadastrados</div>
+      <div id="lean-list">
+        <div class="empty"><div class="empty-icon">♻</div><p>Nenhum projeto Lean cadastrado.</p><button class="btn-primary btn-sm" onclick="abrirModalLean()">+ Novo Projeto</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ░░░░░ CAPEX ░░░░░ -->
+<div class="page" id="page-capex">
+  <div class="page-hdr">
+    <div><h1>CAPEX <span>& ROI</span></h1><p>Motor de ROI cruzado — CAPEX vs. redução de OPEX futuro, MTBF e eliminação de riscos laborais.</p></div>
+    <div class="hdr-actions"><button class="btn-primary" onclick="abrirModalCapex()">+ Novo Investimento</button></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-title ct-red">Parâmetros do Investimento</div>
+      <div class="sl-row"><span class="sl-lbl">CAPEX (R$ M)</span><input type="range" min="0.5" max="100" step="0.5" value="8" id="cx-capex" oninput="calcCapexSim()"><span class="sl-val" id="cv-capex">R$ 8M</span></div>
+      <div class="sl-row"><span class="sl-lbl">Redução OPEX (%)</span><input type="range" min="2" max="40" value="15" id="cx-red" oninput="calcCapexSim()"><span class="sl-val" id="cv-red">15%</span></div>
+      <div class="sl-row"><span class="sl-lbl">OPEX Base (R$ M/ano)</span><input type="range" min="5" max="300" value="40" id="cx-base" oninput="calcCapexSim()"><span class="sl-val" id="cv-base">R$ 40M</span></div>
+      <div class="sl-row"><span class="sl-lbl">Δ MTBF melhoria (%)</span><input type="range" min="5" max="80" value="35" id="cx-mtbf" oninput="calcCapexSim()"><span class="sl-val" id="cv-mtbf">+35%</span></div>
+      <div class="sl-row"><span class="sl-lbl">Custo Parada (R$/h)</span><input type="range" min="5000" max="500000" step="5000" value="85000" id="cx-ind" oninput="calcCapexSim()"><span class="sl-val" id="cv-ind">R$ 85k</span></div>
+      <div class="sl-row"><span class="sl-lbl">TMA (%)</span><input type="range" min="5" max="25" value="12" id="cx-tma" oninput="calcCapexSim()"><span class="sl-val" id="cv-tma">12%</span></div>
+      <div class="sl-row"><span class="sl-lbl">Vida Útil (anos)</span><input type="range" min="3" max="20" value="10" id="cx-vida" oninput="calcCapexSim()"><span class="sl-val" id="cv-vida">10 anos</span></div>
+
+      <div class="result-bar" style="margin-top:14px">
+        <div class="res-item"><div class="res-label">Payback</div><div class="res-val" style="color:var(--or)" id="cx-pay">0 anos</div></div>
+        <div class="res-item"><div class="res-label">NPV</div><div class="res-val" style="color:var(--gr)" id="cx-npv">R$ 0</div></div>
+        <div class="res-item"><div class="res-label">ROI Total</div><div class="res-val" style="color:var(--cy)" id="cx-roi">0%</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title ct-red">Curva de Retorno Acumulado</div>
+        <div class="chart-box" style="height:200px"><canvas id="chartCapex" role="img" aria-label="Curva retorno CAPEX">Retorno CAPEX.</canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title ct-yellow">Drivers de Justificativa Estratégica</div>
+        <div id="capex-drivers-display"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title ct-red">Investimentos Cadastrados</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>CC</th><th>Descrição</th><th>Valor CAPEX</th><th>Redução OPEX/ano</th><th>Payback</th><th>NPV</th><th>Status</th><th></th></tr></thead>
+        <tbody id="tbl-capex">
+          <tr><td colspan="8"><div class="empty"><p>Nenhum investimento cadastrado.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- WATERMARK -->
+<div class="watermark">FinOp™ · Powered by <span>InnoFactury Consulting LLC</span> · finop.innofactury.com · © 2026 Todos os direitos reservados</div>
+
+</main>
+</div>
+
+<!-- ═══════════ MODALS ═══════════ -->
+
+<!-- Modal CC -->
+<div class="modal-bg" id="modal-cc">
+  <div class="modal">
+    <h2>Novo Centro de Custo</h2>
+    <p>Defina a unidade organizacional para consolidação orçamentária.</p>
+    <div class="form-grid">
+      <div class="form-row">
+        <div class="form-group"><label>Código CC *</label><input id="m-cc-cod" placeholder="Ex: CC-1001"></div>
+        <div class="form-group"><label>Departamento *</label><select id="m-cc-dept"><option value="">— Selecione —</option></select></div>
+      </div>
+      <div class="form-group"><label>Descrição *</label><input id="m-cc-desc" placeholder="Ex: Manutenção Mecânica — Planta A"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Planta / Localização</label><input id="m-cc-planta" placeholder="Ex: Planta Minas Gerais"></div>
+        <div class="form-group"><label>Responsável</label><input id="m-cc-resp" placeholder="Nome do gestor"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Orçamento Limite Anual (R$)</label><input id="m-cc-limite" type="number" placeholder="0"></div>
+        <div class="form-group"><label>Status</label><select id="m-cc-status"><option>Ativo</option><option>Inativo</option></select></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="fecharModal('modal-cc')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarCC()">Salvar CC</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Tipo Despesa -->
+<div class="modal-bg" id="modal-td">
+  <div class="modal">
+    <h2>Novo Tipo de Despesa</h2>
+    <p>Configure a categoria, driver principal e fórmula de correlação.</p>
+    <div class="form-grid">
+      <div class="form-row">
+        <div class="form-group"><label>Código *</label><input id="m-td-cod" placeholder="Ex: OP-COMB"></div>
+        <div class="form-group"><label>Tipo *</label>
+          <select id="m-td-tipo" onchange="toggleTDTipo()"><option value="OPEX">OPEX</option><option value="CAPEX">CAPEX</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Categoria *</label>
+          <select id="m-td-cat">
+            <option>Combustível / Energia</option><option>Mão de Obra</option>
+            <option>Manutenção</option><option>Logística / Frota</option>
+            <option>Materiais Indiretos</option><option>Overhead Administrativo</option>
+            <option>Serviços de Terceiros</option><option>Equipamentos</option>
+            <option>Infraestrutura</option><option>Tecnologia</option><option>Outro</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Subcategoria</label><input id="m-td-subcat" placeholder="Ex: Diesel Off-Road"></div>
+      </div>
+      <div class="form-group"><label>Driver Principal *</label>
+        <select id="m-td-driver">
+          <option value="horas_op">Horas de Operação (h/dia)</option>
+          <option value="num_maq">Número de Máquinas</option>
+          <option value="km_dia">Quilômetros / dia</option>
+          <option value="demanda_pct">% Variação de Demanda</option>
+          <option value="hh_mes">Homens-Hora / mês</option>
+          <option value="kwh_mes">kWh consumidos / mês</option>
+          <option value="litros_mes">Litros de combustível / mês</option>
+          <option value="m3_mes">m³ de gás / mês</option>
+          <option value="valor_fixo">Valor fixo (sem driver)</option>
+          <option value="num_equipamentos">Número de Equipamentos</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Fórmula de Correlação</label>
+        <input id="m-td-formula" placeholder="Ex: N_maq × Hrs × CE × P_diesel × IPC_t">
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Unidade de Output</label><input id="m-td-unidade" placeholder="Ex: R$/mês"></div>
+        <div class="form-group"><label>Fator de Correlação Padrão</label><input id="m-td-fator" type="number" step="0.001" value="1" placeholder="1.0"></div>
+      </div>
+      <div id="td-capex-fields" style="display:none">
+        <div class="form-sep">⬡ Parâmetros CAPEX</div>
+        <div class="form-row">
+          <div class="form-group"><label>Vida Útil (anos)</label><input id="m-td-vida" type="number" value="10"></div>
+          <div class="form-group"><label>Método Depreciação</label><select id="m-td-deprec"><option>Linear</option><option>Acelerado</option><option>Unidades Produzidas</option></select></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Ajuste IPC</label><select id="m-td-ipc"><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+        <div class="form-group"><label>Pode receber abatimento Lean</label><select id="m-td-lean"><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="fecharModal('modal-td')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarTD()">Salvar Tipo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Lean -->
+<div class="modal-bg" id="modal-lean">
+  <div class="modal">
+    <h2>Novo Projeto Lean / Kaizen</h2>
+    <p>Ao salvar, o ganho estimado será abatido automaticamente do forecast do CC vinculado.</p>
+    <div class="form-grid">
+      <div class="form-row">
+        <div class="form-group"><label>Nome do Projeto *</label><input id="m-ln-nome" placeholder="Ex: Kaizen Setup Rápido — Linha 3"></div>
+        <div class="form-group"><label>Tipo</label>
+          <select id="m-ln-tipo"><option>Kaizen</option><option>Six Sigma</option><option>VSM</option><option>TPM</option><option>SMED</option><option>5S</option><option>RCM</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Centro de Custo *</label><select id="m-ln-cc"><option value="">— Selecione —</option></select></div>
+        <div class="form-group"><label>Tipo de Waste</label>
+          <select id="m-ln-waste">
+            <option>Transporte</option><option>Inventário / WIP</option><option>Movimento Operador</option>
+            <option>Espera / Setup</option><option>Superprodução</option><option>Superprocessamento</option>
+            <option>Defeitos / Scrap</option><option>Skills Subutilizados</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Custo Atual do Waste (R$/mês)</label><input id="m-ln-waste-val" type="number" placeholder="0"></div>
+        <div class="form-group"><label>Fator de Eliminação α (%)</label><input id="m-ln-alpha" type="number" placeholder="70" value="70"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Início</label><input id="m-ln-inicio" type="month"></div>
+        <div class="form-group"><label>Prazo (meses)</label><input id="m-ln-prazo" type="number" value="3"></div>
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select id="m-ln-status"><option>Planejado</option><option>Em Execução</option><option>Concluído</option></select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="fecharModal('modal-lean')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarLean()">Salvar Projeto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal CAPEX -->
+<div class="modal-bg" id="modal-capex">
+  <div class="modal">
+    <h2>Novo Investimento CAPEX</h2>
+    <p>Vincule o investimento a um CC e tipo de despesa para cálculo automático de ROI cruzado.</p>
+    <div class="form-grid">
+      <div class="form-row">
+        <div class="form-group"><label>Descrição *</label><input id="m-cx-desc" placeholder="Ex: Retrofitting prensa hidráulica"></div>
+        <div class="form-group"><label>Centro de Custo *</label><select id="m-cx-cc"><option value="">— Selecione —</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Valor CAPEX (R$) *</label><input id="m-cx-val" type="number" placeholder="0"></div>
+        <div class="form-group"><label>Tipo Despesa Vinculada</label><select id="m-cx-td"><option value="">— Selecione —</option></select></div>
+      </div>
+      <div class="form-sep">⬡ Parâmetros de ROI</div>
+      <div class="form-row3">
+        <div class="form-group"><label>Redução OPEX (%)</label><input id="m-cx-opex" type="number" value="15"></div>
+        <div class="form-group"><label>Δ MTBF (%)</label><input id="m-cx-mtbf" type="number" value="30"></div>
+        <div class="form-group"><label>Vida Útil (anos)</label><input id="m-cx-vida" type="number" value="10"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Driver: Custo Parada (R$/h)</label><input id="m-cx-par" type="number" value="45000"></div>
+        <div class="form-group"><label>Status</label><select id="m-cx-status"><option>Em Análise</option><option>Aprovado</option><option>Em Execução</option><option>Concluído</option></select></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="fecharModal('modal-capex')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarCapex()">Salvar Investimento</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+const state = {
+  empresa: { nome:'', razao:'', cnpj:'', setor:'Mining & Recursos Naturais', pais:'Brasil', moeda:'BRL', ano:2026, ipca:5.2, igpm:6.1, diesel:5.89, ee:0.724, selic:12.25, usd:5.72, enc:72.5, leanDecay:8, oee:72, mtbf:240, parada:45000 },
+  departamentos: ['Manutenção', 'Produção', 'Logística', 'Qualidade', 'PCM', 'Engenharia', 'Administrativo'],
+  centrosCusto: [],
+  tiposDespesa: [],
+  lancamentos: [],
+  projetosLean: [],
+  investimentosCapex: []
+};
+
+// Seed default tipos de despesa
+state.tiposDespesa = [
+  { id:1, cod:'OP-COMB', tipo:'OPEX', cat:'Combustível / Energia', subcat:'Diesel Off-Road', driver:'horas_op', formula:'N_maq × Hrs × CE × P_diesel × IPC_t', unid:'R$/mês', fator:1, ipc:true, lean:true, vida:null, deprec:null },
+  { id:2, cod:'OP-ENER', tipo:'OPEX', cat:'Combustível / Energia', subcat:'Energia Elétrica', driver:'kwh_mes', formula:'kWh × P_ee × IPC_t × Fator_demanda', unid:'R$/mês', fator:1, ipc:true, lean:true, vida:null, deprec:null },
+  { id:3, cod:'OP-MO',   tipo:'OPEX', cat:'Mão de Obra', subcat:'Operacional', driver:'hh_mes', formula:'HH × Custo_HH × (1+Encargos%) × OEE', unid:'R$/mês', fator:1, ipc:true, lean:true, vida:null, deprec:null },
+  { id:4, cod:'OP-MAN',  tipo:'OPEX', cat:'Manutenção', subcat:'Preventiva + Corretiva', driver:'horas_op', formula:'Hrs_PM × Custo_técnico + Materiais_PM + CM_est', unid:'R$/mês', fator:1, ipc:true, lean:true, vida:null, deprec:null },
+  { id:5, cod:'OP-LOG',  tipo:'OPEX', cat:'Logística / Frota', subcat:'Transporte Rodoviário', driver:'km_dia', formula:'Km × Custo_km × IPC_t × Fator_carga', unid:'R$/mês', fator:1, ipc:true, lean:true, vida:null, deprec:null },
+  { id:6, cod:'CP-EQP',  tipo:'CAPEX', cat:'Equipamentos', subcat:'Máquinas e Ferramental', driver:'valor_fixo', formula:'CAPEX × (1+Juros_finan) / Vida_útil + Deprec', unid:'R$/ano', fator:1, ipc:true, lean:false, vida:10, deprec:'Linear' },
+  { id:7, cod:'CP-INF',  tipo:'CAPEX', cat:'Infraestrutura', subcat:'Civil e Instalações', driver:'valor_fixo', formula:'CAPEX / Vida_útil + TMA × Saldo', unid:'R$/ano', fator:1, ipc:true, lean:false, vida:20, deprec:'Linear' },
+];
+
+let idCtr = {cc:1, td:8, dr:1, ln:1, cx:1};
+let chartCC_inst=null, chartMensal_inst=null, chartBreak_inst=null, chartLeanSim_inst=null, chartCapex_inst=null;
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+/* ════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════ */
+function goPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-'+name);
+  if(page) page.classList.add('active');
+  if(el) el.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+name+"'")) n.classList.add('active');
+    });
+  }
+  // Refresh on navigate
+  if(name==='home') renderHome();
+  if(name==='cc') renderCC();
+  if(name==='despesas') renderTD();
+  if(name==='drivers') populateDriverSelects();
+  if(name==='consolidado') { renderConsolidado(); populateFiltros(); }
+  if(name==='lean') { calcLeanSim(); renderLeanList(); }
+  if(name==='capex') { calcCapexSim(); renderCapexTable(); }
+}
+
+function switchInner(panelId, btn) {
+  const prefix = panelId.split('-').slice(0,-1).join('-');
+  document.querySelectorAll('.itab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.itab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  const panel = document.getElementById('panel-'+panelId);
+  if(panel) panel.classList.add('active');
+}
+
+/* ════════════════════════════════════════════
+   EMPRESA
+════════════════════════════════════════════ */
+function salvarEmpresa() {
+  state.empresa = {
+    ...state.empresa,
+    nome: document.getElementById('emp-nome').value || 'Empresa',
+    razao: document.getElementById('emp-razao').value,
+    cnpj: document.getElementById('emp-cnpj').value,
+    setor: document.getElementById('emp-setor').value,
+    pais: document.getElementById('emp-pais').value,
+    moeda: document.getElementById('emp-moeda').value,
+    ano: parseInt(document.getElementById('emp-ano').value) || 2026,
+    ipca: parseFloat(document.getElementById('mac-ipca').value) || 5.2,
+    igpm: parseFloat(document.getElementById('mac-igpm').value) || 6.1,
+    diesel: parseFloat(document.getElementById('mac-diesel').value) || 5.89,
+    ee: parseFloat(document.getElementById('mac-ee').value) || 0.724,
+    selic: parseFloat(document.getElementById('mac-selic').value) || 12.25,
+    usd: parseFloat(document.getElementById('mac-usd').value) || 5.72,
+    enc: parseFloat(document.getElementById('mac-enc').value) || 72.5,
+    leanDecay: parseFloat(document.getElementById('lean-decay').value) || 8,
+    oee: parseFloat(document.getElementById('lean-oee').value) || 72,
+    mtbf: parseFloat(document.getElementById('lean-mtbf').value) || 240,
+    parada: parseFloat(document.getElementById('lean-parada').value) || 45000
+  };
+  document.getElementById('empresa-badge-name').textContent = state.empresa.nome;
+  document.getElementById('dash-empresa').textContent = state.empresa.nome;
+  document.getElementById('dash-ano').textContent = state.empresa.ano;
+  showToast('✓ Configurações salvas com sucesso!');
+}
+
+function previewLogo(input) {
+  if(!input.files[0]) return;
+  const r = new FileReader();
+  r.onload = e => { document.getElementById('logo-preview-box').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;border-radius:6px">`; };
+  r.readAsDataURL(input.files[0]);
+}
+
+/* ════════════════════════════════════════════
+   CENTROS DE CUSTO
+════════════════════════════════════════════ */
+function abrirModalCC() {
+  const sel = document.getElementById('m-cc-dept');
+  sel.innerHTML = '<option value="">— Selecione —</option>';
+  state.departamentos.forEach(d => sel.innerHTML += `<option>${d}</option>`);
+  document.getElementById('modal-cc').classList.add('open');
+}
+function salvarCC() {
+  const cod = document.getElementById('m-cc-cod').value.trim();
+  const dept = document.getElementById('m-cc-dept').value;
+  const desc = document.getElementById('m-cc-desc').value.trim();
+  if(!cod||!dept||!desc){showToast('⚠ Preencha os campos obrigatórios','rd');return;}
+  state.centrosCusto.push({
+    id: idCtr.cc++, cod, dept, desc,
+    planta: document.getElementById('m-cc-planta').value,
+    resp: document.getElementById('m-cc-resp').value,
+    limite: parseFloat(document.getElementById('m-cc-limite').value)||0,
+    status: document.getElementById('m-cc-status').value
+  });
+  fecharModal('modal-cc');
+  ['m-cc-cod','m-cc-desc','m-cc-planta','m-cc-resp','m-cc-limite'].forEach(id=>document.getElementById(id).value='');
+  renderCC(); updateBadges();
+}
+function renderCC() {
+  const tb = document.getElementById('tbl-cc');
+  if(!state.centrosCusto.length){
+    tb.innerHTML='<tr><td colspan="9"><div class="empty"><div class="empty-icon">🗂</div><p>Nenhum centro de custo.</p><button class="btn-primary btn-sm" onclick="abrirModalCC()">+ Criar CC</button></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = state.centrosCusto.map(cc => {
+    const usado = state.lancamentos.filter(l=>l.cc===cc.id).reduce((s,l)=>s+l.valor,0);
+    const pct = cc.limite ? Math.min(100, Math.round(usado/cc.limite*100)) : 0;
+    const statusCol = cc.status==='Ativo'?'badge-done':'badge-pend';
+    return `<tr>
+      <td><span class="chip">${cc.cod}</span></td>
+      <td>${cc.desc}</td>
+      <td><span class="badge badge-cc">${cc.dept}</span></td>
+      <td>${cc.planta||'—'}</td>
+      <td>${cc.resp||'—'}</td>
+      <td style="font-family:var(--mono)">${fmtR(cc.limite)}</td>
+      <td>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--or);margin-bottom:3px">${fmtR(usado)}</div>
+        <div class="prog-bar" style="width:100px"><div class="prog-fill" style="width:${pct}%;background:${pct>90?'var(--rd)':pct>70?'var(--yw)':'var(--gr)'}"></div></div>
+      </td>
+      <td><span class="badge ${statusCol}">${cc.status}</span></td>
+      <td><div class="tbl-actions"><button class="btn-danger" onclick="deleteCC(${cc.id})">✕</button></div></td>
+    </tr>`;
+  }).join('');
+}
+function deleteCC(id){
+  if(confirm('Remover centro de custo?')){state.centrosCusto=state.centrosCusto.filter(c=>c.id!==id);renderCC();updateBadges();}
+}
+function addDept(){
+  const v=document.getElementById('novo-dept').value.trim();
+  if(v&&!state.departamentos.includes(v)){state.departamentos.push(v);renderDeptChips();document.getElementById('novo-dept').value='';}
+}
+function renderDeptChips(){
+  document.getElementById('dept-chips').innerHTML=state.departamentos.map(d=>`<span class="chip" style="margin:3px">${d}</span>`).join('');
+}
+
+/* ════════════════════════════════════════════
+   TIPOS DE DESPESA
+════════════════════════════════════════════ */
+function abrirModalTD(){document.getElementById('modal-td').classList.add('open');}
+function toggleTDTipo(){
+  const t=document.getElementById('m-td-tipo').value;
+  document.getElementById('td-capex-fields').style.display=t==='CAPEX'?'block':'none';
+}
+function salvarTD(){
+  const cod=document.getElementById('m-td-cod').value.trim();
+  if(!cod){showToast('⚠ Preencha o código','rd');return;}
+  state.tiposDespesa.push({
+    id:idCtr.td++,cod,
+    tipo:document.getElementById('m-td-tipo').value,
+    cat:document.getElementById('m-td-cat').value,
+    subcat:document.getElementById('m-td-subcat').value,
+    driver:document.getElementById('m-td-driver').value,
+    formula:document.getElementById('m-td-formula').value,
+    unid:document.getElementById('m-td-unidade').value||'R$/mês',
+    fator:parseFloat(document.getElementById('m-td-fator').value)||1,
+    ipc:document.getElementById('m-td-ipc').value==='sim',
+    lean:document.getElementById('m-td-lean').value==='sim',
+    vida:parseInt(document.getElementById('m-td-vida').value)||null,
+    deprec:document.getElementById('m-td-deprec').value
+  });
+  fecharModal('modal-td');renderTD();updateBadges();showToast('✓ Tipo de despesa salvo');
+}
+function renderTD(){
+  const opex=state.tiposDespesa.filter(t=>t.tipo==='OPEX');
+  const capex=state.tiposDespesa.filter(t=>t.tipo==='CAPEX');
+  const renderRow=(t,cols)=>`<tr>
+    <td><span class="chip">${t.cod}</span></td>
+    <td>${t.cat}</td><td>${t.subcat||'—'}</td>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--cy)">${driverLabel(t.driver)}</td>
+    <td style="font-family:var(--mono);font-size:10px;color:var(--or)">${t.formula||'—'}</td>
+    ${cols}
+    <td><button class="btn-danger" onclick="deleteTD(${t.id})">✕</button></td>
+  </tr>`;
+  const tbO=document.getElementById('tbl-td-opex');
+  tbO.innerHTML=opex.length?opex.map(t=>renderRow(t,`<td>${t.unid}</td><td>${t.ipc?'<span class="badge badge-ok">Sim</span>':'Não'}</td>`)).join(''):`<tr><td colspan="8"><div class="empty"><p>Nenhum tipo OPEX.</p></div></td></tr>`;
+  const tbC=document.getElementById('tbl-td-capex');
+  tbC.innerHTML=capex.length?capex.map(t=>renderRow(t,`<td>${t.vida||'—'} anos</td><td>${t.deprec||'Linear'}</td>`)).join(''):`<tr><td colspan="8"><div class="empty"><p>Nenhum tipo CAPEX.</p></div></td></tr>`;
+}
+function deleteTD(id){state.tiposDespesa=state.tiposDespesa.filter(t=>t.id!==id);renderTD();updateBadges();}
+function driverLabel(d){
+  const m={horas_op:'Hrs Op/dia',num_maq:'Nº Máquinas',km_dia:'Km/dia',demanda_pct:'% Demanda',hh_mes:'HH/mês',kwh_mes:'kWh/mês',litros_mes:'Litros/mês',m3_mes:'m³/mês',valor_fixo:'Valor Fixo',num_equipamentos:'Nº Equipamentos'};
+  return m[d]||d;
+}
+
+/* ════════════════════════════════════════════
+   DRIVERS
+════════════════════════════════════════════ */
+function populateDriverSelects(){
+  const selCC=document.getElementById('dr-cc');
+  const selTD=document.getElementById('dr-td');
+  selCC.innerHTML='<option value="">— Selecione —</option>'+state.centrosCusto.map(c=>`<option value="${c.id}">${c.cod} — ${c.desc}</option>`).join('');
+  selTD.innerHTML='<option value="">— Selecione —</option>'+state.tiposDespesa.map(t=>`<option value="${t.id}">[${t.tipo}] ${t.cod} — ${t.cat} / ${t.subcat||t.cat}</option>`).join('');
+  renderHistDriver();
+}
+
+function atualizarFormDriver(){
+  const tdId=parseInt(document.getElementById('dr-td').value);
+  const td=state.tiposDespesa.find(t=>t.id===tdId);
+  const area=document.getElementById('driver-fields');
+  if(!td){area.innerHTML='<div class="empty" style="padding:16px 0"><p>Selecione um Tipo de Despesa.</p></div>';return;}
+  const ipc=state.empresa.ipca||5.2;
+  const diesel=state.empresa.diesel||5.89;
+  const ee=state.empresa.ee||0.724;
+  const enc=state.empresa.enc||72.5;
+
+  const fields = {
+    horas_op:`<div class="form-row">
+      <div class="form-group"><label>Nº Máquinas / Equipamentos</label><input id="dr-maq" type="number" value="12" oninput="recalcularDriver()"></div>
+      <div class="form-group"><label>Horas de Operação / dia</label><input id="dr-hrs" type="number" value="18" oninput="recalcularDriver()"></div>
+    </div><div class="form-row">
+      <div class="form-group"><label>Consumo Específico (L/h)</label><input id="dr-ce" type="number" value="28" step="0.5" oninput="recalcularDriver()"></div>
+      <div class="form-group"><label>Preço Combustível (R$/L)</label><input id="dr-preco" type="number" value="${diesel}" step="0.01" oninput="recalcularDriver()"></div>
+    </div>`,
+    kwh_mes:`<div class="form-row">
+      <div class="form-group"><label>Consumo kWh/mês</label><input id="dr-kwh" type="number" value="120000" oninput="recalcularDriver()"></div>
+      <div class="form-group"><label>Tarifa R$/kWh</label><input id="dr-tee" type="number" value="${ee}" step="0.001" oninput="recalcularDriver()"></div>
+    </div><div class="form-row">
+      <div class="form-group"><label>Fator de Demanda (%)</label><input id="dr-fdem" type="number" value="100" oninput="recalcularDriver()"></div>
+      <div class="form-group"><label>Horas Ponta / mês</label><input id="dr-hponta" type="number" value="66" oninput="recalcularDriver()"></div>
+    </div>`,
+    hh_mes:`<div class="form-row">
+      <div class="form-group"><label>Homens-Hora / mês</label><input id="dr-hh" type="number" value="2400" oninput="recalcularDriver()"></div>
+      <div class="form-group"><label>Custo HH (R$/hora)</label><input id="dr-chh" type="number" value="45" step="0.5" oninput="recalcularDriver()"></div>
+    </div><div class="form-row">
+      <div class="form-group"><label>Encargos Trabalhistas (%)</label><input id="dr-enc" type="number" value="${enc}" step="0.1" oninput="recalcularDriver()"></div>
+      <div class="form-group"><label>OEE / Fator Eficiência (%)</label><input id="dr-oee" type="number" value="${state.empresa.oee||72}" oninput="recalcularDriver()"></div>
+    </div>`,
+    km_dia:`<div class="form-row">
+      <div class="form-group"><label>Km / dia</label><input id="dr-km" type="number" value="500" oninput="recalcularDriver()"></div>
+      <div class="form-group"><label>Dias / mês</label><input id="dr-dm" type="number" value="26" oninput="recalcularDriver()"></div>
+    </div><div class="form-row">
+      <div class="form-group"><label>Custo R$/km</label><input id="dr-ckm" type="number" value="3.80" step="0.01" oninput="recalcularDriver()"></div>
+      <div class="form-group"><label>Fator Carga (%)</label><input id="dr-fcarga" type="number" value="85" oninput="recalcularDriver()"></div>
+    </div>`,
+    valor_fixo:`<div class="form-group"><label>Valor Fixo Mensal (R$)</label><input id="dr-fixo" type="number" value="0" oninput="recalcularDriver()"></div>`,
+    num_maq:`<div class="form-row">
+      <div class="form-group"><label>Nº de Equipamentos</label><input id="dr-neq" type="number" value="5" oninput="recalcularDriver()"></div>
+      <div class="form-group"><label>Custo Unit. Manutenção (R$/equip/mês)</label><input id="dr-custeq" type="number" value="8500" oninput="recalcularDriver()"></div>
+    </div>`,
+    demanda_pct:`<div class="form-row">
+      <div class="form-group"><label>OPEX Base Atual (R$/mês)</label><input id="dr-opex-base" type="number" value="0" oninput="recalcularDriver()"></div>
+      <div class="form-group"><label>Variação de Demanda (%)</label><input id="dr-delta-dem" type="number" value="10" step="0.5" oninput="recalcularDriver()"></div>
+    </div>`,
+  };
+  area.innerHTML = fields[td.driver] || fields['valor_fixo'];
+  recalcularDriver();
+}
+
+function recalcularDriver(){
+  const tdId=parseInt(document.getElementById('dr-td').value);
+  const td=state.tiposDespesa.find(t=>t.id===tdId);
+  if(!td){document.getElementById('result-area').innerHTML='<div class="empty" style="padding:16px 0"><p>Selecione tipo de despesa e preencha os campos.</p></div>';return;}
+  const ipc=parseFloat(document.getElementById('dr-ipc').value)/100||0;
+  const eta=parseFloat(document.getElementById('dr-eta').value)/100||0;
+  const ipcFator=td.ipc?(1+ipc):1;
+  let valorBruto=0,desc='';
+  const g=id=>{const el=document.getElementById(id);return el?parseFloat(el.value)||0:0;};
+
+  switch(td.driver){
+    case 'horas_op':
+      valorBruto=g('dr-maq')*g('dr-hrs')*g('dr-ce')*g('dr-preco')*30*ipcFator;
+      desc=`${g('dr-maq')} máq × ${g('dr-hrs')}h/dia × ${g('dr-ce')}L/h × R$${g('dr-preco')}/L × 30 dias`;break;
+    case 'kwh_mes':
+      valorBruto=g('dr-kwh')*g('dr-tee')*(g('dr-fdem')/100)*ipcFator;
+      desc=`${g('dr-kwh')} kWh × R$${g('dr-tee')}/kWh × Fator ${g('dr-fdem')}%`;break;
+    case 'hh_mes':
+      valorBruto=g('dr-hh')*g('dr-chh')*(1+g('dr-enc')/100)*(g('dr-oee')/100)*ipcFator;
+      desc=`${g('dr-hh')} HH × R$${g('dr-chh')}/h × (1+${g('dr-enc')}% enc.) × OEE ${g('dr-oee')}%`;break;
+    case 'km_dia':
+      valorBruto=g('dr-km')*g('dr-dm')*g('dr-ckm')*(g('dr-fcarga')/100)*ipcFator;
+      desc=`${g('dr-km')} km/dia × ${g('dr-dm')} dias × R$${g('dr-ckm')}/km × Carga ${g('dr-fcarga')}%`;break;
+    case 'valor_fixo':
+      valorBruto=g('dr-fixo')*ipcFator;desc='Valor fixo com ajuste IPC';break;
+    case 'num_maq':
+      valorBruto=g('dr-neq')*g('dr-custeq')*ipcFator;
+      desc=`${g('dr-neq')} equip. × R$${g('dr-custeq')}/mês`;break;
+    case 'demanda_pct':
+      valorBruto=g('dr-opex-base')*(1+g('dr-delta-dem')/100)*ipcFator;
+      desc=`R$${g('dr-opex-base')} × (1 + ${g('dr-delta-dem')}% demanda)`;break;
+    default: valorBruto=0;
+  }
+  const valorLean=valorBruto*(1-eta);
+  const eco=valorBruto-valorLean;
+  const badge=td.tipo==='OPEX'?'badge-opex':'badge-capex';
+  document.getElementById('result-area').innerHTML=`
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--txt3);font-family:var(--mono);margin-bottom:6px">${desc}</div>
+      <div class="result-bar" style="flex-wrap:wrap;gap:12px">
+        <div class="res-item"><div class="res-label">Custo Bruto / mês</div><div class="res-val" style="color:var(--rd)">${fmtR(valorBruto)}</div></div>
+        <div class="res-item"><div class="res-label">com Lean (η=${(eta*100).toFixed(0)}%)</div><div class="res-val" style="color:var(--or)">${fmtR(valorLean)}</div></div>
+        <div class="res-item"><div class="res-label">Economia Lean</div><div class="res-val" style="color:var(--gr)">${fmtR(eco)}</div></div>
+        <div class="res-item"><div class="res-label">Anual (×12)</div><div class="res-val" style="color:var(--cy)">${fmtR(valorLean*12)}</div></div>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border-radius:var(--r6);padding:10px 14px">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--txt3)">FÓRMULA APLICADA</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--or);margin-top:4px">${td.formula||'—'}</div>
+    </div>`;
+  window._lastCalc={tdId,valorBruto,valorLean,eco,desc};
+}
+
+function lancarDriver(){
+  const ccId=parseInt(document.getElementById('dr-cc').value);
+  const tdId=parseInt(document.getElementById('dr-td').value);
+  const mes=document.getElementById('dr-mes').value;
+  const obs=document.getElementById('dr-obs').value;
+  if(!ccId||!tdId){showToast('⚠ Selecione CC e Tipo de Despesa','rd');return;}
+  if(!window._lastCalc){showToast('⚠ Preencha os campos de driver','rd');return;}
+  const cc=state.centrosCusto.find(c=>c.id===ccId);
+  const td=state.tiposDespesa.find(t=>t.id===tdId);
+  const eta=parseFloat(document.getElementById('dr-eta').value)||0;
+  const ipc=parseFloat(document.getElementById('dr-ipc').value)||0;
+  state.lancamentos.push({
+    id:idCtr.dr++,cc:ccId,td:tdId,mes,obs,
+    ccNome:cc?`${cc.cod} — ${cc.desc}`:'—',
+    tdNome:td?`${td.cod} / ${td.cat}`:'—',
+    tipo:td?td.tipo:'OPEX',
+    valorBruto:window._lastCalc.valorBruto,
+    valor:window._lastCalc.valorLean,
+    eco:window._lastCalc.eco,
+    eta,ipc,desc:window._lastCalc.desc
+  });
+  updateBadges();renderHistDriver();renderHome();
+  showToast('✓ Driver lançado e incorporado ao forecast do FinOp!');
+}
+
+function renderHistDriver(){
+  const tb=document.getElementById('tbl-hist-drivers');
+  if(!state.lancamentos.length){tb.innerHTML='<tr><td colspan="6"><div class="empty" style="padding:12px 0"><p>Nenhum lançamento.</p></div></td></tr>';return;}
+  tb.innerHTML=[...state.lancamentos].reverse().slice(0,10).map(l=>`<tr>
+    <td><span class="chip" style="font-size:10px">${l.ccNome.split('—')[0].trim()}</span></td>
+    <td style="font-size:11px">${l.tdNome}</td>
+    <td>${l.mes}</td>
+    <td style="font-family:var(--mono);color:var(--or)">${fmtR(l.valor)}</td>
+    <td><span class="badge ${l.tipo==='OPEX'?'badge-opex':'badge-capex'}">${l.tipo}</span></td>
+    <td><button class="btn-danger" onclick="deleteLanc(${l.id})">✕</button></td>
+  </tr>`).join('');
+}
+
+function deleteLanc(id){state.lancamentos=state.lancamentos.filter(l=>l.id!==id);renderHistDriver();updateBadges();renderHome();}
+function limparFormDriver(){document.getElementById('dr-cc').value='';document.getElementById('dr-td').value='';document.getElementById('driver-fields').innerHTML='<div class="empty" style="padding:16px 0"><p>Selecione um Tipo de Despesa para ver os campos de driver.</p></div>';document.getElementById('result-area').innerHTML='<div class="empty" style="padding:16px 0"><p>Preencha os campos ao lado para calcular.</p></div>';window._lastCalc=null;}
+
+/* ════════════════════════════════════════════
+   HOME DASHBOARD
+════════════════════════════════════════════ */
+function renderHome(){
+  const totalOpex=state.lancamentos.filter(l=>l.tipo==='OPEX').reduce((s,l)=>s+l.valor,0);
+  const totalLean=state.projetosLean.reduce((s,p)=>s+(p.wasteVal*(p.alpha/100)*12),0);
+  const totalCapex=state.investimentosCapex.reduce((s,c)=>s+(parseFloat(c.val)||0),0);
+  const depts=new Set(state.centrosCusto.map(c=>c.dept)).size;
+
+  document.getElementById('kpi-opex-total').textContent=fmtR(totalOpex);
+  document.getElementById('kpi-opex-sub').textContent=state.lancamentos.length+' lançamentos ativos';
+  document.getElementById('kpi-lean-total').textContent=fmtR(totalLean);
+  document.getElementById('kpi-lean-sub').textContent=state.projetosLean.length+' projetos ativos';
+  document.getElementById('kpi-capex-total').textContent=fmtR(totalCapex);
+  document.getElementById('kpi-capex-sub').textContent=state.investimentosCapex.length+' investimentos';
+  document.getElementById('kpi-cc-total').textContent=state.centrosCusto.length;
+  document.getElementById('kpi-cc-sub').textContent=depts+' departamentos';
+
+  // Chart CC
+  const ccData={};
+  state.lancamentos.forEach(l=>{
+    const cc=state.centrosCusto.find(c=>c.id===l.cc);
+    const lbl=cc?cc.cod:'Outros';
+    ccData[lbl]=(ccData[lbl]||0)+l.valor;
+  });
+  const labels=Object.keys(ccData)||['Sem dados'];
+  const vals=Object.values(ccData)||[0];
+  const colors=['#FF6B00','#00D4FF','#00C896','#FFD600','#B39DDB','#FF4757','#4FC3F7'];
+  if(chartCC_inst)chartCC_inst.destroy();
+  chartCC_inst=new Chart(document.getElementById('chartCC'),{
+    type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:colors.slice(0,labels.length),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#506A8E',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#506A8E',callback:v=>fmtR(v)},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  // Chart Mensal
+  const mensal=new Array(12).fill(0);
+  state.lancamentos.forEach(l=>{const i=MESES.findIndex(m=>m===l.mes.slice(0,3));if(i>=0)mensal[i]+=l.valor;});
+  if(chartMensal_inst)chartMensal_inst.destroy();
+  chartMensal_inst=new Chart(document.getElementById('chartMensal'),{
+    type:'line',data:{labels:MESES,datasets:[{data:mensal,borderColor:'#FF6B00',borderWidth:2,fill:{target:'origin',above:'rgba(255,107,0,0.06)'},tension:0.4,pointRadius:3,pointBackgroundColor:'#FF6B00'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#506A8E',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#506A8E',callback:v=>fmtR(v)},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  // Tabela recentes
+  const tb=document.getElementById('tbl-recentes');
+  if(!state.lancamentos.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">📭</div><p>Nenhum lançamento. <a href="#" onclick="goPage(\'drivers\')" style="color:var(--or)">Lançar drivers agora →</a></p></div></td></tr>';return;}
+  tb.innerHTML=[...state.lancamentos].reverse().slice(0,5).map(l=>`<tr>
+    <td><span class="chip" style="font-size:10px">${l.ccNome}</span></td>
+    <td style="font-size:11px">${l.tdNome}</td>
+    <td style="font-size:11px;color:var(--txt3)">${l.desc||'—'}</td>
+    <td style="font-family:var(--mono);color:var(--or)">${fmtR(l.valor)}</td>
+    <td><span class="badge ${l.tipo==='OPEX'?'badge-opex':'badge-capex'}">${l.tipo}</span></td>
+    <td>${l.mes}</td>
+  </tr>`).join('');
+}
+
+/* ════════════════════════════════════════════
+   CONSOLIDADO
+════════════════════════════════════════════ */
+function populateFiltros(){
+  const fcc=document.getElementById('filtro-cc');
+  const fd=document.getElementById('filtro-dept');
+  fcc.innerHTML='<option value="">Todos os CCs</option>'+state.centrosCusto.map(c=>`<option value="${c.id}">${c.cod}</option>`).join('');
+  fd.innerHTML='<option value="">Todos os Depts</option>'+[...new Set(state.centrosCusto.map(c=>c.dept))].map(d=>`<option>${d}</option>`).join('');
+}
+function renderConsolidado(){
+  const filtCC=parseInt(document.getElementById('filtro-cc').value)||null;
+  const filtDept=document.getElementById('filtro-dept').value||null;
+  let ccs=state.centrosCusto;
+  if(filtCC)ccs=ccs.filter(c=>c.id===filtCC);
+  if(filtDept)ccs=ccs.filter(c=>c.dept===filtDept);
+
+  const totalOrig=state.lancamentos.filter(l=>l.tipo==='OPEX').reduce((s,l)=>s+l.valorBruto,0);
+  const totalLean=state.lancamentos.filter(l=>l.tipo==='OPEX').reduce((s,l)=>s+l.valor,0);
+  const eco=totalOrig-totalLean;
+  const totalCapex=state.investimentosCapex.reduce((s,c)=>s+(parseFloat(c.val)||0),0);
+
+  document.getElementById('con-orig').textContent=fmtR(totalOrig);
+  document.getElementById('con-lean').textContent=fmtR(totalLean);
+  document.getElementById('con-eco').textContent=fmtR(eco);
+  document.getElementById('con-capex').textContent=fmtR(totalCapex);
+
+  const leanPct=totalOrig>0?((eco/totalOrig)*100):0;
+  document.getElementById('narr-vol').textContent=state.lancamentos.length>0?'+12%':'—';
+  document.getElementById('narr-opex').textContent=leanPct>0?`-${leanPct.toFixed(0)}%`:'—';
+  document.getElementById('narr-ebtda').textContent=leanPct>0?`+${(leanPct*1.8).toFixed(0)}%`:'—';
+
+  // Table
+  const tb=document.getElementById('tbl-consolidado');
+  if(!ccs.length||!state.lancamentos.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><p>Lance drivers e cadastre CCs para ver a consolidação.</p></div></td></tr>';return;}
+  const grand=state.lancamentos.reduce((s,l)=>s+l.valor,0)||1;
+  tb.innerHTML=ccs.map(cc=>{
+    const lancCC=state.lancamentos.filter(l=>l.cc===cc.id);
+    const orig=lancCC.reduce((s,l)=>s+l.valorBruto,0);
+    const adj=lancCC.reduce((s,l)=>s+l.valor,0);
+    const lean=orig-adj;
+    const capexCC=state.investimentosCapex.filter(c=>c.ccId===cc.id).reduce((s,c)=>s+(parseFloat(c.val)||0),0);
+    const pct=((adj/grand)*100).toFixed(1);
+    const over=cc.limite&&adj>cc.limite;
+    return `<tr>
+      <td><span class="chip">${cc.cod}</span><div style="font-size:10px;color:var(--txt3);margin-top:3px">${cc.desc}</div></td>
+      <td><span class="badge badge-cc">${cc.dept}</span></td>
+      <td style="font-family:var(--mono);color:var(--rd)">${fmtR(orig)}</td>
+      <td style="font-family:var(--mono);color:var(--gr)">${lean>0?'-':''} ${fmtR(lean)}</td>
+      <td style="font-family:var(--mono);color:var(--or);font-weight:600">${fmtR(adj)}</td>
+      <td style="font-family:var(--mono);color:var(--pu)">${capexCC>0?fmtR(capexCC):'—'}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="prog-bar" style="width:80px"><div class="prog-fill" style="width:${Math.min(100,pct)}%;background:var(--or)"></div></div>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--txt3)">${pct}%</span>
+        </div>
+      </td>
+      <td><span class="badge ${over?'badge-pend':'badge-done'}">${over?'Acima limite':'OK'}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Breakdown chart
+  const cats={};
+  state.lancamentos.forEach(l=>{const td=state.tiposDespesa.find(t=>t.id===l.td);const c=td?td.cat:'Outros';cats[c]=(cats[c]||0)+l.valor;});
+  const catKeys=Object.keys(cats);
+  const catVals=Object.values(cats);
+  const catColors=['#FF6B00','#00D4FF','#00C896','#FFD600','#B39DDB','#FF4757','#4FC3F7','#f06'];
+  if(chartBreak_inst)chartBreak_inst.destroy();
+  chartBreak_inst=new Chart(document.getElementById('chartBreakdown'),{
+    type:'doughnut',
+    data:{labels:catKeys.length?catKeys:['Sem dados'],datasets:[{data:catVals.length?catVals:[1],backgroundColor:catColors,borderColor:'var(--bg1)',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8BA3C7',font:{size:11},boxWidth:10,padding:8}}}}
+  });
+}
+
+/* ════════════════════════════════════════════
+   LEAN
+════════════════════════════════════════════ */
+function abrirModalLean(){
+  const sel=document.getElementById('m-ln-cc');
+  sel.innerHTML='<option value="">— Selecione —</option>'+state.centrosCusto.map(c=>`<option value="${c.id}">${c.cod} — ${c.desc}</option>`).join('');
+  document.getElementById('modal-lean').classList.add('open');
+}
+function salvarLean(){
+  const nome=document.getElementById('m-ln-nome').value.trim();
+  const ccId=parseInt(document.getElementById('m-ln-cc').value);
+  const wasteVal=parseFloat(document.getElementById('m-ln-waste-val').value)||0;
+  if(!nome||!ccId){showToast('⚠ Nome e CC são obrigatórios','rd');return;}
+  state.projetosLean.push({
+    id:idCtr.ln++,nome,ccId,
+    tipo:document.getElementById('m-ln-tipo').value,
+    waste:document.getElementById('m-ln-waste').value,
+    wasteVal,alpha:parseFloat(document.getElementById('m-ln-alpha').value)||70,
+    inicio:document.getElementById('m-ln-inicio').value,
+    prazo:document.getElementById('m-ln-prazo').value,
+    status:document.getElementById('m-ln-status').value
+  });
+  fecharModal('modal-lean');renderLeanList();updateBadges();showToast('✓ Projeto Lean salvo e abatimento aplicado ao forecast');
+}
+function renderLeanList(){
+  const area=document.getElementById('lean-list');
+  if(!state.projetosLean.length){area.innerHTML='<div class="empty"><div class="empty-icon">♻</div><p>Nenhum projeto cadastrado.</p><button class="btn-primary btn-sm" onclick="abrirModalLean()">+ Novo Projeto</button></div>';return;}
+  area.innerHTML=state.projetosLean.map(p=>{
+    const cc=state.centrosCusto.find(c=>c.id===p.ccId);
+    const ganhoAnual=p.wasteVal*(p.alpha/100)*12;
+    const stBadge=p.status==='Concluído'?'badge-done':p.status==='Em Execução'?'badge-ok':'badge-pend';
+    return `<div style="border:1px solid var(--border);border-radius:var(--r8);padding:12px 14px;margin-bottom:8px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div>
+          <div style="font-weight:600;font-size:13px;color:var(--txt);margin-bottom:4px">${p.nome}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+            <span class="badge badge-lean">${p.tipo}</span>
+            <span class="badge badge-cc">${cc?cc.cod:'—'}</span>
+            <span class="badge ${stBadge}">${p.status}</span>
+          </div>
+          <div style="font-size:11px;color:var(--txt3)">Waste: <span style="color:var(--yw)">${p.waste}</span> · α = ${p.alpha}%</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--gr)">${fmtR(ganhoAnual)}</div>
+          <div style="font-size:10px;color:var(--txt3)">ganho/ano</div>
+          <button class="btn-danger" style="margin-top:6px" onclick="deleteLean(${p.id})">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function deleteLean(id){state.projetosLean=state.projetosLean.filter(p=>p.id!==id);renderLeanList();updateBadges();}
+
+let leanSimChart=null;
+function calcLeanSim(){
+  const waste=parseInt(document.getElementById('ln-waste').value)*1000;
+  const alpha=parseInt(document.getElementById('ln-alpha').value)/100;
+  const decay=parseInt(document.getElementById('ln-decay').value)/100;
+  const ipca=parseInt(document.getElementById('ln-ipca').value)/100;
+  document.getElementById('lv-waste').textContent='R$ '+document.getElementById('ln-waste').value+'k';
+  document.getElementById('lv-alpha').textContent=document.getElementById('ln-alpha').value+'%';
+  document.getElementById('lv-decay').textContent=document.getElementById('ln-decay').value+'%';
+  document.getElementById('lv-ipca').textContent=document.getElementById('ln-ipca').value+'%';
+  const gains=[];for(let t=1;t<=5;t++)gains.push(Math.max(0,waste*alpha*Math.max(0,1-decay*(t-1))*(1+ipca)*12));
+  document.getElementById('ls-y1').textContent=fmtR(gains[0]);
+  document.getElementById('ls-y5').textContent=fmtR(gains.reduce((a,b)=>a+b,0));
+  document.getElementById('ls-pct').textContent=(alpha*100*(1-decay*0)).toFixed(0)+'%';
+  if(leanSimChart)leanSimChart.destroy();
+  leanSimChart=new Chart(document.getElementById('chartLeanSim'),{
+    type:'bar',data:{labels:['Ano 1','Ano 2','Ano 3','Ano 4','Ano 5'],
+    datasets:[{data:gains.map(g=>Math.round(g/1000)/1000),backgroundColor:'rgba(0,200,150,0.7)',borderColor:'#00C896',borderWidth:1,borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#506A8E',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#506A8E',callback:v=>'R$ '+v+'M'},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+/* ════════════════════════════════════════════
+   CAPEX
+════════════════════════════════════════════ */
+function abrirModalCapex(){
+  ['m-cx-cc','m-cx-td'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(id==='m-cx-cc') sel.innerHTML='<option value="">— Selecione —</option>'+state.centrosCusto.map(c=>`<option value="${c.id}">${c.cod} — ${c.desc}</option>`).join('');
+    if(id==='m-cx-td') sel.innerHTML='<option value="">— Selecione —</option>'+state.tiposDespesa.filter(t=>t.tipo==='CAPEX').map(t=>`<option value="${t.id}">${t.cod} — ${t.cat}</option>`).join('');
+  });
+  document.getElementById('modal-capex').classList.add('open');
+}
+function salvarCapex(){
+  const desc=document.getElementById('m-cx-desc').value.trim();
+  const val=parseFloat(document.getElementById('m-cx-val').value)||0;
+  if(!desc||!val){showToast('⚠ Descrição e valor são obrigatórios','rd');return;}
+  const ccId=parseInt(document.getElementById('m-cx-cc').value)||null;
+  const cc=state.centrosCusto.find(c=>c.id===ccId);
+  const opexBase=state.lancamentos.filter(l=>l.cc===ccId&&l.tipo==='OPEX').reduce((s,l)=>s+l.valor*12,0)||0;
+  const opexRed=parseFloat(document.getElementById('m-cx-opex').value)/100||0.15;
+  const mtbf=parseFloat(document.getElementById('m-cx-mtbf').value)/100||0.3;
+  const vida=parseInt(document.getElementById('m-cx-vida').value)||10;
+  const parada=parseFloat(document.getElementById('m-cx-par').value)||state.empresa.parada||45000;
+  const selic=state.empresa.selic/100||0.12;
+  const deltaOpex=opexBase*opexRed;
+  const hIndisp=8760*0.05;
+  const deltaConfiab=(hIndisp/(1+mtbf)-hIndisp/(1+mtbf+0.01))*parada*vida;
+  const totalBenefit=(deltaOpex+deltaConfiab)*vida;
+  const payback=totalBenefit>0?val/(deltaOpex+hIndisp*parada*mtbf*0.5):99;
+  state.investimentosCapex.push({
+    id:idCtr.cx++,desc,val,ccId,ccNome:cc?cc.cod:'—',
+    opexRed:opexRed*100,mtbf:mtbf*100,vida,parada,
+    payback:payback.toFixed(1),
+    npv:fmtR(totalBenefit-val),
+    status:document.getElementById('m-cx-status').value
+  });
+  fecharModal('modal-capex');renderCapexTable();updateBadges();showToast('✓ Investimento CAPEX salvo — ROI calculado');
+}
+function renderCapexTable(){
+  const tb=document.getElementById('tbl-capex');
+  if(!state.investimentosCapex.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><p>Nenhum investimento.</p></div></td></tr>';return;}
+  tb.innerHTML=state.investimentosCapex.map(c=>{
+    const st=c.status==='Aprovado'?'badge-done':c.status==='Em Execução'?'badge-ok':c.status==='Concluído'?'badge-done':'badge-pend';
+    return `<tr>
+      <td><span class="chip">${c.ccNome}</span></td>
+      <td style="font-size:12px">${c.desc}</td>
+      <td style="font-family:var(--mono);color:var(--rd)">${fmtR(c.val)}</td>
+      <td style="font-family:var(--mono);color:var(--gr)">${c.opexRed}%</td>
+      <td style="font-family:var(--mono);color:var(--or)">${c.payback} anos</td>
+      <td style="font-family:var(--mono);color:var(--cy)">${c.npv}</td>
+      <td><span class="badge ${st}">${c.status}</span></td>
+      <td><button class="btn-danger" onclick="deleteCapex(${c.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+function deleteCapex(id){state.investimentosCapex=state.investimentosCapex.filter(c=>c.id!==id);renderCapexTable();updateBadges();}
+
+let capexSimChart=null;
+function calcCapexSim(){
+  const capex=parseFloat(document.getElementById('cx-capex').value)*1e6;
+  const red=parseFloat(document.getElementById('cx-red').value)/100;
+  const base=parseFloat(document.getElementById('cx-base').value)*1e6;
+  const mtbf=parseFloat(document.getElementById('cx-mtbf').value)/100;
+  const ind=parseFloat(document.getElementById('cx-ind').value);
+  const tma=parseFloat(document.getElementById('cx-tma').value)/100;
+  const vida=parseInt(document.getElementById('cx-vida').value);
+
+  document.getElementById('cv-capex').textContent='R$ '+document.getElementById('cx-capex').value+'M';
+  document.getElementById('cv-red').textContent=document.getElementById('cx-red').value+'%';
+  document.getElementById('cv-base').textContent='R$ '+document.getElementById('cx-base').value+'M';
+  document.getElementById('cv-mtbf').textContent='+'+document.getElementById('cx-mtbf').value+'%';
+  document.getElementById('cv-ind').textContent='R$ '+Math.round(ind/1000)+'k';
+  document.getElementById('cv-tma').textContent=document.getElementById('cx-tma').value+'%';
+  document.getElementById('cv-vida').textContent=vida+' anos';
+
+  const deltaOpex=base*red;
+  const hIndisp=8760*0.05;
+  const deltaConfiab=(hIndisp-hIndisp/(1+mtbf))*ind;
+  const totalBenefit=deltaOpex+deltaConfiab;
+  const payback=capex/totalBenefit;
+  let npv=-capex;const years=[],inv=[],ret=[],npvL=[];let cumR=0;
+  for(let t=1;t<=vida;t++){npv+=totalBenefit/Math.pow(1+tma,t);cumR+=totalBenefit;years.push('Ano '+t);inv.push(-Math.round(capex/1e6*10)/10);ret.push(Math.round(cumR/1e6*10)/10);npvL.push(Math.round((cumR-capex)/1e6*10)/10);}
+  document.getElementById('cx-pay').textContent=payback.toFixed(1)+' anos';
+  document.getElementById('cx-npv').textContent=(npv>=0?'+':'')+fmtR(npv);
+  document.getElementById('cx-npv').style.color=npv>=0?'var(--gr)':'var(--rd)';
+  document.getElementById('cx-roi').textContent=Math.round((totalBenefit*vida-capex)/capex*100)+'%';
+
+  document.getElementById('capex-drivers-display').innerHTML=`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;color:var(--txt);margin-bottom:2px">📈 Ganho de Confiabilidade (MTBF +${Math.round(mtbf*100)}%)</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--or)">${fmtR(deltaConfiab)}/ano · Δ${Math.round(hIndisp-hIndisp/(1+mtbf))}h × R$${Math.round(ind/1000)}k/h</div>
+    </div>
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;color:var(--txt);margin-bottom:2px">⚡ Redução Direta de OPEX (${Math.round(red*100)}%)</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--or)">${fmtR(deltaOpex)}/ano · Base ${fmtR(base)} × ${Math.round(red*100)}%</div>
+    </div>
+    <div style="padding:10px 0">
+      <div style="font-size:11px;font-weight:600;color:var(--txt);margin-bottom:2px">🛡 Risco Laboral & Qualidade</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--yw)">Qualitativo — avaliar com EHS e Qualidade</div>
+    </div>`;
+
+  if(capexSimChart)capexSimChart.destroy();
+  capexSimChart=new Chart(document.getElementById('chartCapex'),{
+    type:'line',data:{labels:years,datasets:[
+      {label:'Investimento',data:inv,borderColor:'#FF4757',borderWidth:2,fill:false,tension:0,pointRadius:2},
+      {label:'Retorno Acum.',data:ret,borderColor:'#00C896',borderWidth:2,fill:false,tension:0.3,pointRadius:2},
+      {label:'VPL Líquido',data:npvL,borderColor:'#FF6B00',borderWidth:1.5,borderDash:[5,3],fill:{target:'origin',above:'rgba(255,107,0,0.04)',below:'rgba(255,71,87,0.04)'},tension:0.3,pointRadius:0}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#506A8E',font:{size:11},boxWidth:10}}},scales:{x:{ticks:{color:'#506A8E',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#506A8E',callback:v=>'R$ '+v+'M'},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+/* ════════════════════════════════════════════
+   UTILITIES
+════════════════════════════════════════════ */
+function fecharModal(id){document.getElementById(id).classList.remove('open');}
+// Close modal on bg click
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');}));
+
+function updateBadges(){
+  document.getElementById('badge-cc').textContent=state.centrosCusto.length;
+  document.getElementById('badge-td').textContent=state.tiposDespesa.length;
+  document.getElementById('badge-dr').textContent=state.lancamentos.length;
+  document.getElementById('badge-lean').textContent=state.projetosLean.length;
+}
+
+function fmtR(v){
+  if(!v&&v!==0)return'—';
+  const abs=Math.abs(v);const sig=v<0?'-':'';
+  if(abs>=1e9)return sig+'R$ '+(abs/1e9).toFixed(1)+'B';
+  if(abs>=1e6)return sig+'R$ '+(abs/1e6).toFixed(2)+'M';
+  if(abs>=1e3)return sig+'R$ '+(abs/1e3).toFixed(1)+'k';
+  return sig+'R$ '+Math.round(abs).toLocaleString('pt-BR');
+}
+
+function refreshAll(){renderHome();}
+
+function exportarRelatorio(){
+  alert('Funcionalidade de exportação PDF/Excel disponível na versão Enterprise.\n\nInnoFactury Consulting LLC\ncontato@innofactury.com');
+}
+
+function showToast(msg,type='gr'){
+  const t=document.createElement('div');
+  t.style.cssText=`position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--${type});color:var(--${type});padding:10px 18px;border-radius:8px;font-family:var(--mono);font-size:12px;z-index:9999;animation:fadeIn .2s ease`;
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},2500);
+}
+
+// Init
+updateBadges();renderDeptChips();renderTD();
+calcLeanSim();calcCapexSim();
+renderHome();
+</script>
+</body>
+</html>
